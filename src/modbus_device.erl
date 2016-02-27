@@ -40,10 +40,12 @@ write_hreg(Device, Offset, Value) ->
 
 init([Type, Host, Port, DeviceAddr]) ->
 	Retval = gen_tcp:connect(Host, Port, [{active,false}, {packet, 0}]),
+	io:format("~p~n", [Retval]),
 
 	case Retval of
 		{ok, Sock} ->
 			State = #modbus_state{type=Type,sock=Sock,device_address=DeviceAddr,tid=1},
+			io:format("~p~n", [State]),
 			{ok, State, 5000};
 		{error,ErrorType} ->
 			{stop,{error,ErrorType}}
@@ -80,7 +82,8 @@ handle_call({write_hreg_16,Offset,OrigData}, _From, State) ->
             
 	{reply, FinalData, NewState, 5000};
 
-handle_call(stop,_From,State) ->
+handle_call(stop, From,State) ->
+  io:format("handle_call(stop, ~p)~n", [From]),
 	gen_tcp:close(State#modbus_state.sock),
 	{stop, normal, stopped, State}.
 
